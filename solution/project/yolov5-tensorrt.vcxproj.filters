@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\src\logging.h" />
+    <ClInclude Include="..\src\build_network.h" />
+    <ClInclude Include="..\src\box_utils.h" />
+    <ClInclude Include="..\src\yololayer.h" />
+    <ClInclude Include="..\src\utils.h" />
+    <ClInclude Include="..\src\common.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\yolov5.cpp" />
+    <ClCompile Include="..\src\build_network.cpp" />
+    <ClCompile Include="..\src\box_utils.cpp" />
+    <ClCompile Include="..\src\common.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\src\yololayer.cu" />
+  </ItemGroup>
+</Project>
