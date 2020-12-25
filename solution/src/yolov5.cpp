@@ -9,13 +9,14 @@ using namespace std;
 
 
 int main(int argc, char** argv) {
+    printf("%d,%d\n", INPUT_H, INPUT_W);
     cudaSetDevice(DEVICE);
     // create a model using the API directly and serialize it to a stream
     char* trtModelStream{nullptr};
     size_t size{0};
-    string engine_name = "E:\\ObjectDetection\\yolov5-tensorrtapi-test\\solution\\res\\demo-8192-5952.engine";
+    string engine_name = argv[1]; // "E:\\ObjectDetection\\yolov5-tensorrtapi-test\\solution\\res\\demo-8192-5952.engine";
     string img_path = "";
-    if (argc == 2 && string(argv[1]) == "-s") {
+    if (argc == 3 && string(argv[2]) == "-s") {
         IHostMemory* modelStream{nullptr};
         CBuildNetwork::api_to_model(BATCH_SIZE, &modelStream);
         assert(modelStream != nullptr);
@@ -27,7 +28,7 @@ int main(int argc, char** argv) {
         p.write(reinterpret_cast<const char*>(modelStream->data()), modelStream->size());
         modelStream->destroy();
         return 0;
-    } else if (argc == 3 && string(argv[1]) == "-d") {
+    } else if (argc == 4 && string(argv[2]) == "-d") {
         std::ifstream file(engine_name, std::ios::binary);
         if (file.good()) {
             file.seekg(0, file.end);
@@ -38,7 +39,7 @@ int main(int argc, char** argv) {
             file.read(trtModelStream, size);
             file.close();
         }
-        img_path = argv[2];
+        img_path = argv[3];
     } else {
         std::cerr << "arguments not right!" << endl;
         std::cerr << "./yolov5 -s  // serialize model to plan file" << endl;
@@ -83,7 +84,7 @@ int main(int argc, char** argv) {
     CBuildNetwork::do_inference(*context, input_data.data(), output0, BATCH_SIZE);
 
     auto start = std::chrono::system_clock::now();
-    for (size_t i = 0; i < 100; i++) {
+    for (size_t i = 0; i < 1; i++) {
         batch_res.clear();
         if (!img.data) {
             cout << "img empty" << endl;
@@ -109,11 +110,13 @@ int main(int argc, char** argv) {
         for (size_t j = 0; j < res.size(); j++) {
             cv::Rect r = get_rect(img, res[j].bbox);
             cv::rectangle(img, r, cv::Scalar(0x27, 0xC1, 0x36), 2);
-            cv::putText(img, std::to_string(res[j].conf), cv::Point(r.x, r.y - 1), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0xFF, 0xFF, 0xFF), 2);
+            cv::putText(img, std::to_string(res[j].class_id) + std::to_string(res[j].conf), cv::Point(r.x, r.y - 1), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0xFF, 0xFF, 0xFF), 2);
         }
     }
 
-    cv::imwrite("E:\\data\\yolov5-qrcode\\test\\res\\paste_img_8192_5952.jpg", img);
+    auto pos = img_path.find_last_of('\\');
+    std::string save_path = img_path.substr(0, pos) + "/c++_res/" + img_path.substr(pos, img_path.size());
+    cv::imwrite(save_path, img);
 
     // destroy engine
     context->destroy();
